@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 const API_BASE_URL = 'http://localhost:3001'
@@ -66,6 +66,42 @@ function buttonKind(button) {
     return 'operator'
   }
   return 'number'
+}
+
+function mapKeyToButton(key) {
+  if (/^[0-9]$/.test(key)) {
+    return key
+  }
+
+  if (key === '.') {
+    return '.'
+  }
+
+  if (key === '+' || key === '-' || key === '%') {
+    return key
+  }
+
+  if (key === '*') {
+    return 'x'
+  }
+
+  if (key === '/') {
+    return '÷'
+  }
+
+  if (key === 'Enter' || key === '=') {
+    return '='
+  }
+
+  if (key === 'Backspace') {
+    return 'bksp'
+  }
+
+  if (key === 'Escape' || key === 'Delete') {
+    return 'Clear'
+  }
+
+  return null
 }
 
 function App() {
@@ -147,6 +183,41 @@ function App() {
 
     appendValue(button)
   }
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      const target = event.target
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+
+      const mappedButton = mapKeyToButton(event.key)
+      if (!mappedButton) {
+        return
+      }
+
+      if (
+        event.key === 'Backspace' ||
+        event.key === 'Enter' ||
+        event.key === '=' ||
+        event.key === 'Delete'
+      ) {
+        event.preventDefault()
+      }
+
+      void handleButtonPress(mappedButton)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [handleButtonPress])
 
   return (
     <main className="app-shell">
