@@ -5,7 +5,7 @@ const API_BASE_URL = 'http://localhost:3001'
 
 const BUTTONS = [
   'Clear',
-  'Backspace',
+  'bksp',
   '%',
   '÷',
   '7',
@@ -59,7 +59,7 @@ function buttonKind(button) {
   if (button === '=') {
     return 'equals'
   }
-  if (button === 'Clear' || button === 'Backspace' || button === '+/-') {
+  if (button === 'Clear' || button === 'bksp' || button === '+/-') {
     return 'action'
   }
   if (isOperator(button)) {
@@ -104,7 +104,7 @@ function App() {
       return
     }
 
-    if (button === 'Backspace') {
+    if (button === 'bksp') {
       setExpression((prev) => {
         if (prev.length <= 1) {
           return '0'
