@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import './App.css'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const API_CALCULATE_URL =
+  (import.meta.env.VITE_API_CALCULATE_URL || '').trim() || `${API_BASE_URL}/calculate`
 
 const BUTTONS = [
   'Clear',
@@ -162,16 +164,30 @@ function App() {
       setIsCalculating(true)
       try {
         const normalizedExpression = expression.replace(/x/g, '*').replace(/÷/g, '/')
-        const response = await fetch(`${API_BASE_URL}/calculate`, {
+        const response = await fetch(API_CALCULATE_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ expression: normalizedExpression }),
         })
-        const data = await response.json()
+
+        const rawBody = await response.text()
+        let data = null
+        try {
+          data = rawBody ? JSON.parse(rawBody) : null
+        } catch {
+          data = null
+        }
+
         if (!response.ok) {
-          setExpression(data.error || 'Error')
+          setExpression(data?.error || `Error ${response.status}`)
           return
         }
+
+        if (!data?.result) {
+          setExpression('Invalid API Response')
+          return
+        }
+
         setExpression(data.result)
       } catch {
         setExpression('Server Error')
